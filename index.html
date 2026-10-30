@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Phool for my Fool</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Playfair+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+/* ---------- Tokens ---------- */
+:root{
+  --bg:#0b1016; --ink:#fbe9ef; --rose:#ff9ebd; --gold:#ffd88a;
+  --base:clamp(52px,12vw,104px);           /* overall flower head size */
+  --serif:'Playfair Display',Georgia,'Times New Roman',serif;
+  --display:'Cinzel','Trajan Pro',Georgia,serif;
+  color-scheme:dark; box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;height:100%;overflow:hidden;color:var(--ink);font-family:var(--serif);
+  background:radial-gradient(120% 70% at 50% 115%,#16232f 0%,#0e161e 45%,var(--bg) 75%);
+}
+
+/* ---------- Layers ---------- */
+#fx{position:fixed;inset:0;width:100%;height:100%;z-index:3;pointer-events:none}
+.stage{position:fixed;inset:0;display:grid;place-items:center;padding:20px;z-index:5;pointer-events:none}
+.glass{
+  pointer-events:auto;text-align:center;width:min(88vw,460px);box-sizing:border-box;
+  padding:34px 26px 30px;border-radius:26px;
+  background:rgba(14,22,30,.5);border:1px solid rgba(255,214,226,.18);
+  -webkit-backdrop-filter:blur(14px) saturate(1.2);backdrop-filter:blur(14px) saturate(1.2);
+  box-shadow:0 20px 60px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+/* ---------- Greeting ---------- */
+.greet .glass{cursor:pointer;animation:cardIn 1.6s ease .3s both;
+  transition:opacity .9s ease,transform .9s ease,visibility 0s linear .9s}
+.greet.gone .glass{opacity:0;transform:scale(.96) translateY(-10px);visibility:hidden;pointer-events:none}
+.greet p{margin:0 0 26px;font-style:italic;font-size:clamp(1.35rem,5.4vw,1.85rem);line-height:1.4}
+.open{
+  font:inherit;font-size:1.05rem;color:var(--ink);cursor:pointer;
+  padding:12px 28px;border-radius:999px;border:1px solid rgba(255,158,189,.6);
+  background:linear-gradient(135deg,rgba(255,120,170,.3),rgba(255,200,120,.18));
+  animation:pulse 2.4s ease-in-out infinite;
+}
+.open:focus-visible{outline:2px solid var(--gold);outline-offset:4px}
+@keyframes cardIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes pulse{
+  0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(255,140,180,.45)}
+  50%{transform:scale(1.045);box-shadow:0 0 0 14px rgba(255,140,180,0)}
+}
+
+/* ---------- Final card ---------- */
+.final{padding-bottom:24vh;z-index:6}
+.final .glass{opacity:0;transform:translateY(18px) scale(.98);transition:opacity 2.2s ease,transform 2.2s ease}
+.final.show .glass{opacity:1;transform:none}
+.final h2{
+  margin:0 0 14px;font-family:var(--display);font-weight:700;letter-spacing:.09em;
+  font-size:clamp(1.55rem,6.6vw,2.55rem);line-height:1.15;color:#ffe3ec;
+  text-shadow:0 0 22px rgba(255,140,180,.55),0 2px 4px rgba(0,0,0,.5);
+}
+.final p{margin:0;font-style:italic;font-size:clamp(1.05rem,4.2vw,1.3rem);line-height:1.7;color:#f6dbe4}
+
+/* ---------- Garden ---------- */
+#garden{position:fixed;left:0;right:0;bottom:0;height:70vh;z-index:2;pointer-events:none}
+.flower{position:absolute;bottom:0;left:var(--x);width:0;height:var(--h);transform-origin:50% 100%}
+.stem{position:absolute;left:-1.5px;bottom:0;width:3px;height:100%;border-radius:3px;
+  background:linear-gradient(#63c47f,#2b7745);transform:scaleY(0);transform-origin:bottom}
+.leaf{position:absolute;left:0;bottom:var(--b);width:calc(var(--sz)*.55);height:auto;overflow:visible;
+  transform:scale(0);transform-origin:0 100%}
+.head{position:absolute;top:0;left:0;width:var(--sz);height:var(--sz);
+  margin:calc(var(--sz)/-2) 0 0 calc(var(--sz)/-2);overflow:visible;transform:scale(0);
+  filter:drop-shadow(0 0 8px rgba(255,170,200,.3))}
+.bud{animation:none}
+
+/* Growth sequence (class .go is added by script.js) */
+.go .stem{animation:grow var(--stem-dur) var(--d) cubic-bezier(.3,.7,.2,1) forwards}
+.go .leaf{animation:leaf 1.2s calc(var(--d) + var(--ld)) cubic-bezier(.3,1.3,.5,1) forwards}
+.go .head{animation:bloom var(--bloom-dur) calc(var(--d) + var(--bloom-after)) cubic-bezier(.34,1.4,.5,1) forwards}
+.go .bud{animation:budfade var(--bloom-dur) calc(var(--d) + var(--bloom-after)) ease forwards}
+@keyframes grow{to{transform:scaleY(1)}}
+@keyframes leaf{from{transform:scale(0,0)}to{transform:scale(var(--fx),1)}}
+@keyframes bloom{
+  0%{transform:scale(0) rotate(-60deg)}
+  30%{transform:scale(.28) rotate(-30deg)}
+  100%{transform:scale(1) rotate(0)}
+}
+@keyframes budfade{0%,25%{opacity:1}60%,100%{opacity:0}}
+
+/* Gentle sway once grown */
+.swaying .flower{animation:sway var(--sw) ease-in-out infinite}
+@keyframes sway{0%,100%{transform:rotate(0)}25%{transform:rotate(2.2deg)}75%{transform:rotate(-2.2deg)}}
+
+@media (prefers-reduced-motion:reduce){
+  .swaying .flower,.open{animation:none}
+}
+</style>
+</head>
+<body>
+
+<!-- Shared petal gradients -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <linearGradient id="gC" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ff5c95"/><stop offset="1" stop-color="#ffd1e3"/></linearGradient>
+  <linearGradient id="gS" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#f2a900"/><stop offset="1" stop-color="#ffe45c"/></linearGradient>
+  <linearGradient id="gS2" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#d98a00"/><stop offset="1" stop-color="#ffc933"/></linearGradient>
+  <linearGradient id="gP" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#b3122b"/><stop offset="1" stop-color="#ff6060"/></linearGradient>
+  <linearGradient id="gP2" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#e0394d"/><stop offset="1" stop-color="#ffa3a3"/></linearGradient>
+  <linearGradient id="gD" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ffe9f1"/><stop offset="1" stop-color="#ffffff"/></linearGradient>
+</defs></svg>
+
+<canvas id="fx" aria-hidden="true"></canvas>
+<div id="garden" aria-hidden="true"></div>
+
+<!-- 1. GREETING: edit the text and button label here -->
+<div class="stage greet" id="greet">
+  <div class="glass" id="card" role="group">
+    <p>Hey cutie I bought smthing for you~🙈</p>
+    <button class="open" id="openBtn" type="button">Click to open 🎁</button>
+  </div>
+</div>
+
+<!-- 4. FINAL REVEAL: edit the header and body text here -->
+<div class="stage final" id="final">
+  <div class="glass">
+    <h2>PHOOL FOR MY FOOL</h2>
+    <p>Not all beautiful things grow in gardens.🦋<br>Just look at you!😋🫶🏻</p>
+  </div>
+</div>
+
+<script>
+/* =====================  TIMINGS (seconds) — adjust freely  ===================== */
+const CFG = {
+  startDelay: 0.7,    // wait after the greeting starts fading before flowers begin
+  stagger: 0.15,      // gap between each flower starting to grow (center first)
+  stemSeconds: 2.2,   // how long a stem takes to grow
+  bloomAfter: 2.1,    // seconds after a stem starts growing until its bud appears
+  bloomSeconds: 2.0,  // how long a bud takes to open
+  cardDelay: 2.5      // pause after the last bloom opens before the final card fades in
+};
+/* ============================================================================ */
+
+const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const K = calm ? 0.2 : 1;                       // shortens everything for reduced-motion users
+const $ = id => document.getElementById(id);
+const garden = $('garden'), greet = $('greet'), card = $('card'), finalCard = $('final');
+const rnd = (a, b) => a + Math.random() * (b - a);
+
+const rs = document.documentElement.style;
+rs.setProperty('--stem-dur', CFG.stemSeconds * K + 's');
+rs.setProperty('--bloom-after', CFG.bloomAfter * K + 's');
+rs.setProperty('--bloom-dur', CFG.bloomSeconds * K + 's');
+
+/* ---------- Flower heads (SVG, centered at 0,0) ---------- */
+const ring = (n, off, inner) => Array.from({length: n}, (_, i) =>
+  `<g transform="rotate(${(i * 360 / n + off).toFixed(2)})">${inner}</g>`).join('');
+
+const HEADS = {
+  cosmos: {m: 1.1, svg: ring(8, 0, '<path d="M0-6C-18-16-18-40-9-46L0-39L9-46C18-40 18-16 0-6Z" fill="url(#gC)"/>')
+    + '<circle r="6.5" fill="#ffc83d"/><circle r="3" fill="#f0a020"/>'},
+  sunflower: {m: 1.3, svg: ring(14, 0, '<path d="M0-13C-10-22-8-40 0-49C8-40 10-22 0-13Z" fill="url(#gS2)"/>')
+    + ring(14, 360 / 28, '<path d="M0-12C-9-21-7-37 0-45C7-37 9-21 0-12Z" fill="url(#gS)"/>')
+    + '<circle r="15" fill="#4b2a12"/><circle r="10" fill="#6a3b16"/><circle r="4.5" fill="#3a1f0d"/>'},
+  poppy: {m: 1.05, svg: ring(5, 0, '<path d="M0-4C-27-8-32-42 0-46C32-42 27-8 0-4Z" fill="url(#gP)"/>')
+    + ring(5, 36, '<path d="M0-4C-18-8-21-30 0-33C21-30 18-8 0-4Z" fill="url(#gP2)" opacity=".85"/>')
+    + '<circle r="7" fill="#2a1216"/>' + ring(10, 0, '<circle cy="-11" r="1.5" fill="#12070a"/>')},
+  daisy: {m: 0.9, svg: ring(13, 0, '<ellipse cy="-29" rx="5.2" ry="17" fill="url(#gD)"/>')
+    + '<circle r="9.5" fill="#ffc83d"/><circle r="4.5" fill="#e9a21c"/>'}
+};
+const KINDS = ['cosmos', 'sunflower', 'poppy', 'daisy'];
+const LEAF = '<path d="M0 24C8 2 28 0 40 4C32 20 14 26 0 24Z" fill="#3f9a5a"/><path d="M2 23C14 14 26 8 38 5" stroke="#8fdca5" stroke-width="1" fill="none" opacity=".6"/>';
+
+/* ---------- Plant the garden ---------- */
+const COUNT = innerWidth < 520 ? 9 : innerWidth < 900 ? 12 : 15;   // fewer flowers on small screens
+const flowers = Array.from({length: COUNT}, (_, i) => {
+  const x = 6 + i * (88 / (COUNT - 1)) + rnd(-2.5, 2.5);
+  const arc = 1 - 0.3 * Math.abs(x - 50) / 50;                     // taller in the middle
+  return {x, h: (24 + Math.random() * 28) * arc, kind: KINDS[(i * 3 + 1) % 4]};
+});
+// grow from the center outward
+[...flowers].sort((a, b) => Math.abs(a.x - 50) - Math.abs(b.x - 50))
+  .forEach((f, rank) => f.d = rank * CFG.stagger * K);
+
+garden.innerHTML = flowers.map(f => {
+  const t = HEADS[f.kind], b1 = rnd(16, 28), b2 = rnd(40, 58);
+  const ld = b => (CFG.stemSeconds * K * (b / 100) * 0.9 + 0.2).toFixed(2);
+  return `<div class="flower" style="--x:${f.x.toFixed(1)}%;--h:${f.h.toFixed(1)}vh;--sz:calc(var(--base)*${t.m});--d:${f.d.toFixed(2)}s;--sw:${rnd(4.5, 7).toFixed(1)}s">
+    <i class="stem"></i>
+    <svg class="leaf" viewBox="0 0 40 24" style="--b:${b1.toFixed(0)}%;--ld:${ld(b1)}s;--fx:1">${LEAF}</svg>
+    <svg class="leaf" viewBox="0 0 40 24" style="--b:${b2.toFixed(0)}%;--ld:${ld(b2)}s;--fx:-1">${LEAF}</svg>
+    <svg class="head" viewBox="-50 -50 100 100">${t.svg}<circle class="bud" r="12" fill="#3f9a5a"/></svg>
+  </div>`;
+}).join('');
+
+/* ---------- Click sequence ---------- */
+let started = false;
+function start() {
+  if (started) return;
+  started = true;
+  greet.classList.add('gone');                                      // fade the greeting out
+  const bloomEnd = (COUNT - 1) * CFG.stagger * K + (CFG.bloomAfter + CFG.bloomSeconds) * K;
+  setTimeout(() => garden.classList.add('go'), CFG.startDelay * 1000 * K);          // grow + bloom
+  setTimeout(() => garden.classList.add('swaying'), (CFG.startDelay + bloomEnd) * 1000);  // sway
+  setTimeout(() => finalCard.classList.add('show'),
+    (CFG.startDelay + bloomEnd + CFG.cardDelay * K) * 1000);                         // final card
+}
+card.addEventListener('click', start);
+
+/* ---------- Fireflies / floating light particles ---------- */
+const cv = $('fx'), cx = cv.getContext('2d');
+let W, H, DPR, P = [];
+function resize() {
+  DPR = Math.min(devicePixelRatio || 1, 2);
+  W = cv.width = innerWidth * DPR; H = cv.height = innerHeight * DPR;
+  const n = Math.round(Math.min(70, Math.max(28, innerWidth / 18)));
+  P = Array.from({length: n}, () => ({
+    x: Math.random() * W, y: Math.random() * H,
+    r: rnd(1.2, 3.2) * DPR, vx: rnd(-.12, .12) * DPR, vy: rnd(-.22, -.02) * DPR,
+    ph: rnd(0, 6.28), sp: rnd(.6, 1.6), hue: Math.random() < .7 ? rnd(42, 58) : rnd(325, 345)
+  }));
+}
+resize(); addEventListener('resize', resize);
+
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(50, now - last) / 16.7; last = now;
+  const t = now / 1000, slow = calm ? 0.3 : 1;
+  cx.clearRect(0, 0, W, H);
+  cx.globalCompositeOperation = 'lighter';
+  for (const p of P) {
+    p.x += (p.vx + Math.cos(t * p.sp + p.ph) * .18 * DPR) * dt * slow;
+    p.y += (p.vy + Math.sin(t * p.sp * .8 + p.ph) * .12 * DPR) * dt * slow;
+    if (p.y < -20) p.y = H + 20;
+    if (p.x < -20) p.x = W + 20; else if (p.x > W + 20) p.x = -20;
+    const a = .25 + .75 * (Math.sin(t * p.sp * 1.4 + p.ph) * .5 + .5);
+    const R = p.r * 6;
+    const g = cx.createRadialGradient(p.x, p.y, 0, p.x, p.y, R);
+    g.addColorStop(0, `hsla(${p.hue},100%,78%,${a})`);
+    g.addColorStop(.25, `hsla(${p.hue},100%,65%,${a * .35})`);
+    g.addColorStop(1, `hsla(${p.hue},100%,60%,0)`);
+    cx.fillStyle = g;
+    cx.beginPath(); cx.arc(p.x, p.y, R, 0, 6.2832); cx.fill();
+  }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
